@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Protected Page</title>
+    <style>
+        .login-container {
+            text-align: center;
+            margin-top: 100px;
+            padding: 20px;
+        }
+        .content {
+            display: none;
+        }
+        input {
+            padding: 10px;
+            margin: 10px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .error {
+            color: red;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container" id="loginSection">
+        <h2>Enter Access Code</h2>
+        <input type="password" id="passwordInput" placeholder="Enter code">
+        <button onclick="checkPassword()">Enter</button>
+        <div class="error" id="errorMsg">Invalid code! Try again.</div>
+    </div>
+
+    <div class="content" id="contentSection">
+        <h1>Welcome to the Protected Content! 🔒</h1>
+        <p>This is your secret content that only people with the code can see.</p>
+        <p><a href="secret-content.html" target="_blank" rel="noopener noreferrer">Ylang </a></p>
+        <!-- Add your actual website content here -->
+    </div>
+
+    <script>
+        function checkPassword() {
+            const correctCode = "12345"; // Change this to your desired code
+            const userInput = document.getElementById('passwordInput').value;
+            const errorMsg = document.getElementById('errorMsg');
+            const loginSection = document.getElementById('loginSection');
+            const contentSection = document.getElementById('contentSection');
+
+            if (userInput === correctCode) {
+                loginSection.style.display = 'none';
+                contentSection.style.display = 'block';
+            } else {
+                errorMsg.style.display = 'block';
+                document.getElementById('passwordInput').value = '';
+            }
+        }
+
+        // Allow pressing Enter key
+        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkPassword();
+            }
+        });
+    </script>
+</body>
+</html>
