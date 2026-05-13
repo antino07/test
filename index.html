@@ -3,36 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Camera with Filters</title>
-    <!-- Link to your CSS file -->
-    <link rel="stylesheet" href="style.css"> 
+    <title>AI Face Filters</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- This is the AI magic loaded directly from the internet -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
+    <script defer src="script.js"></script>
 </head>
 <body>
 
-    <h2>Filter Camera</h2>
+    <h2>AI Face Filters</h2>
+    <p id="loading-text">Loading AI Models... please wait!</p>
     
-    <!-- Live Preview -->
-    <video id="camera-stream" autoplay playsinline></video>
+    <div class="video-container">
+        <video id="camera-stream" autoplay playsinline muted></video>
+        <!-- This canvas sits directly on top of the video to draw the filters -->
+        <canvas id="filter-canvas"></canvas>
+    </div>
     
     <div class="controls">
-        <!-- Filter Selection Dropdown -->
-        <select id="filter-select">
+        <select id="filter-select" disabled>
             <option value="none">No Filter</option>
-            <option value="grayscale(100%)">Grayscale</option>
-            <option value="sepia(100%)">Sepia</option>
-            <option value="invert(100%)">Invert</option>
-            <option value="blur(4px)">Blur</option>
-            <option value="contrast(150%)">High Contrast</option>
-            <option value="hue-rotate(90deg)">Alien (Hue Rotate)</option>
+            <option value="love">💖 Love Stuck</option>
+            <option value="dizzy">🐦 Dizzy Birds</option>
+            <option value="twirl">🌀 Twirl (Spirals)</option>
         </select>
-
-        <button id="capture-btn">📸 Snap & Download</button>
+        <button id="capture-btn" disabled>📸 Snap</button>
     </div>
 
-    <!-- Hidden Canvas used for processing the final image -->
-    <canvas id="photo-canvas"></canvas>
-
-    <!-- Link to your JavaScript file (always at the bottom of the body) -->
-    <script src="script.js"></script> 
 </body>
 </html>
