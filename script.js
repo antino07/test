@@ -7,22 +7,22 @@ const loadingText = document.getElementById('loading-text');
 
 let currentFilter = 'none';
 
-// --- NEW: LOAD YOUR CUSTOM IMAGES ---
-// Make sure you have heart.png and bird.png saved in the same folder!
+// --- 1. LOAD YOUR CUSTOM IMAGES ---
 const heartImg = new Image();
 heartImg.src = 'heart.png'; 
 
 const birdImg = new Image();
 birdImg.src = 'bird.png';
 
-// --- 1. LOAD THE AI MODELS ---
+// --- 2. LOAD THE AI MODELS ---
 Promise.all([
     faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/')
 ]).then(startVideo);
 
-// --- 2. START THE CAMERA ---
+// --- 3. TURN ON THE FRONT CAMERA ---
 function startVideo() {
     loadingText.innerText = "Starting Camera...";
+    // "facingMode: user" forces the front selfie camera on phones
     navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "user" } } })
         .then(stream => {
             video.srcObject = stream;
@@ -34,7 +34,7 @@ function startVideo() {
         });
 }
 
-// --- 3. THE AI FILTER ENGINE ---
+// --- 4. THE AI FILTER ENGINE ---
 video.addEventListener('play', () => {
     loadingText.innerText = "Ready!";
     loadingText.style.color = "#4caf50"; 
@@ -44,14 +44,15 @@ video.addEventListener('play', () => {
     const displaySize = { width: video.videoWidth, height: video.videoHeight };
     faceapi.matchDimensions(canvas, displaySize);
 
+    // Loop to draw the filters constantly
     setInterval(async () => {
         const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions());
         const resizedDetections = faceapi.resizeResults(detections, displaySize);
         
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // --- NEW: LOOP THROUGH EVERY FACE FOUND ---
         if (resizedDetections.length > 0) {
+            // Apply to all faces found
             resizedDetections.forEach(detection => {
                 const face = detection.box;
                 
@@ -67,11 +68,9 @@ filterSelect.addEventListener('change', (e) => {
     currentFilter = e.target.value;
 });
 
-// --- 4. THE DRAWING FUNCTIONS ---
+// --- 5. THE DRAWING FUNCTIONS ---
 function drawLoveStuck(face) {
-    // Check if the image has loaded, then draw it floating above the head
     if (heartImg.complete) {
-        // Draw 3 hearts at different positions above the bounding box
         ctx.drawImage(heartImg, face.x, face.y - 40, 40, 40);
         ctx.drawImage(heartImg, face.x + (face.width / 2) - 20, face.y - 60, 50, 50);
         ctx.drawImage(heartImg, face.x + face.width - 40, face.y - 30, 35, 35);
@@ -87,7 +86,7 @@ function drawDizzy(face) {
 
         for (let i = 0; i < 3; i++) {
             const angle = time + (i * ((Math.PI * 2) / 3));
-            const birdX = centerX + Math.cos(angle) * radius - 20; // -20 to center the image
+            const birdX = centerX + Math.cos(angle) * radius - 20; 
             const birdY = centerY + Math.sin(angle) * (radius / 3) - 20;
 
             ctx.drawImage(birdImg, birdX, birdY, 40, 40);
@@ -96,6 +95,7 @@ function drawDizzy(face) {
 }
 
 function drawTwirl(face) {
+    // Emoji spiral (true pixel distortion crashes mobile browsers without WebGL)
     const centerX = face.x + (face.width / 2);
     const centerY = face.y + (face.height / 2);
     
@@ -105,13 +105,14 @@ function drawTwirl(face) {
     ctx.textAlign = "start"; 
 }
 
-// --- 5. CAPTURE & DOWNLOAD ---
+// --- 6. CAPTURE & DOWNLOAD ---
 captureBtn.addEventListener('click', () => {
     const tempCanvas = document.createElement('canvas');
     tempCanvas.width = video.videoWidth;
     tempCanvas.height = video.videoHeight;
     const tempCtx = tempCanvas.getContext('2d');
 
+    // Flip horizontally to match what the user sees on screen
     tempCtx.translate(tempCanvas.width, 0);
     tempCtx.scale(-1, 1);
 
@@ -119,7 +120,7 @@ captureBtn.addEventListener('click', () => {
     tempCtx.drawImage(canvas, 0, 0, tempCanvas.width, tempCanvas.height);
 
     const link = document.createElement('a');
-    link.download = `Filtered_Selfie_${Date.now()}.png`;
+    link.download = `Selfie_${Date.now()}.png`;
     link.href = tempCanvas.toDataURL('image/png');
     link.click();
 });
