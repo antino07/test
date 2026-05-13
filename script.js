@@ -95,14 +95,73 @@ function drawDizzy(face) {
 }
 
 function drawTwirl(face) {
-    // Emoji spiral (true pixel distortion crashes mobile browsers without WebGL)
-    const centerX = face.x + (face.width / 2);
-    const centerY = face.y + (face.height / 2);
+    // 1. Give the face box a little extra padding so the swirl blends well
+    const pad = 30; 
+    const x = Math.max(0, face.x - pad);
+    const y = Math.max(0, face.y - pad);
+    const w = face.width + (pad * 2);
+    const h = face.height + (pad * 2);
+
+    // 2. Create a tiny, invisible temporary canvas just for the face
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = w;
+    tempCanvas.height = h;
+    const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
+
+    // 3. "Take a photo" of the user's face from the live video feed
+    tempCtx.drawImage(video, x, y, w, h, 0, 0, w, h);
+
+    // 4. Extract the raw pixel data from that photo
+    const imgData = tempCtx.getImageData(0, 0, w, h);
+    const pixels = imgData.data;
     
-    ctx.font = "100px Arial";
-    ctx.textAlign = "center";
-    ctx.fillText("🌀", centerX, centerY + 35);
-    ctx.textAlign = "start"; 
+    // Create a copy of the pixels to hold our new swirled image
+    const newPixels = new Uint8ClampedArray(pixels);
+
+    // 5. The Twirl Math (Translating the OpenCV logic to JavaScript)
+    const centerX = w / 2;
+    const centerY = h / 2;
+    const radius = Math.min(w, h) / 2;
+    const twistAngle = 2.5; // Change this number to make the twirl stronger or weaker!
+
+    for (let i = 0; i < h; i++) {
+        for (let j = 0; j < w; j++) {
+            const offsetX = j - centerX;
+            const offsetY = i - centerY;
+            const distance = Math.sqrt(offsetX * offsetX + offsetY * offsetY);
+
+            if (distance < radius) {
+                // Calculate how much to twist this specific pixel
+                const currentAngle = Math.atan2(offsetY, offsetX);
+                const amountToTwist = twistAngle * ((radius - distance) / radius);
+                const newAngle = currentAngle + amountToTwist;
+
+                // Find where to grab the source color from
+                let srcX = Math.round(centerX + distance * Math.cos(newAngle));
+                let srcY = Math.round(centerY + distance * Math.sin(newAngle));
+
+                // Keep it inside the box
+                srcX = Math.max(0, Math.min(w - 1, srcX));
+                srcY = Math.max(0, Math.min(h - 1, srcY));
+
+                // JavaScript pixels are in a flat array [R, G, B, Alpha, R, G, B, Alpha...]
+                const destIdx = (i * w + j) * 4;
+                const srcIdx = (srcY * w + srcX) * 4;
+
+                newPixels[destIdx] = pixels[srcIdx];         // Red
+                newPixels[destIdx + 1] = pixels[srcIdx + 1]; // Green
+                newPixels[destIdx + 2] = pixels[srcIdx + 2]; // Blue
+                // We leave Alpha alone so it stays fully opaque
+            }
+        }
+    }
+
+    // 6. Put the swirled pixels back onto the temporary canvas
+    imgData.data.set(newPixels);
+    tempCtx.putImageData(imgData, 0, 0);
+
+    // 7. Draw the final swirled face onto your main screen!
+    ctx.drawImage(tempCanvas, x, y);
 }
 
 // --- 6. CAPTURE & DOWNLOAD ---
