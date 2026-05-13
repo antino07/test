@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Face Filters</title>
     <link rel="stylesheet" href="style.css">
-    <!-- This is the AI magic loaded directly from the internet -->
+    <!-- Load the AI Face Tracking Library -->
     <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
     <script defer src="script.js"></script>
 </head>
@@ -15,8 +15,9 @@
     <p id="loading-text">Loading AI Models... please wait!</p>
     
     <div class="video-container">
+        <!-- playsinline is required for iOS -->
         <video id="camera-stream" autoplay playsinline muted></video>
-        <!-- This canvas sits directly on top of the video to draw the filters -->
+        <!-- The canvas sits on top of the video to draw the filters -->
         <canvas id="filter-canvas"></canvas>
     </div>
     
@@ -27,7 +28,7 @@
             <option value="dizzy">🐦 Dizzy Birds</option>
             <option value="twirl">🌀 Twirl (Spirals)</option>
         </select>
-        <button id="capture-btn" disabled>📸 Snap</button>
+        <button id="capture-btn" disabled>📸 Snap & Save</button>
     </div>
 
 </body>
